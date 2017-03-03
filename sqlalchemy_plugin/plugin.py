@@ -32,10 +32,9 @@ def processor(labor):
         ret = labor()
     except Exception as e:
         ctx.db.rollback()
-        web.internalerror("internal error")
-        logging.exception(e)
-    finally:
         ctx.db.close()
+        raise e
+    ctx.db.close()
     return ret
 
 
