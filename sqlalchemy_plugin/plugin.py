@@ -1,3 +1,4 @@
+import logging
 import web
 from web import config, ctx
 from sqlalchemy import create_engine
@@ -30,6 +31,8 @@ def processor(labor):
         ctx.db = config.db_session_maker()
         ret = labor()
     except Exception as e:
+        ctx.db.rollback()
+        web.internalerror("internal error")
         logging.exception(e)
     finally:
         ctx.db.close()
