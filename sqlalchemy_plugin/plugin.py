@@ -1,4 +1,3 @@
-import logging
 import web
 from web import config, ctx
 from sqlalchemy import create_engine
@@ -13,28 +12,28 @@ obase = declarative_base()
 
 
 def init():
-    dbconf = config.mysql
-    engine = create_engine('mysql+mysqlconnector://{}:{}@{}:{}/{}'.format(
+    dbconf = config.database
+    engine = create_engine('{}://{}:{}@{}:{}/{}'.format(
+        dbconf.protocol,  # mysql+mysqlconnector
         dbconf.username,
         dbconf.password,
         dbconf.host,
         dbconf.port,
         dbconf.database,
     ), pool_recycle=3600)
-    config.db_session_maker = sessionmaker(bind=engine)
+    web.g.db_session_maker = sessionmaker(bind=engine)
     web.add_json_encoder(_encode_row_obj)
 
 
-def processor(labor):
-    ret = {'code': 500}
+def processor(f):
     try:
-        ctx.db = config.db_session_maker()
-        ret = labor()
+        ctx.db = web.g.db_session_maker()
+        ret = f()
     except Exception as e:
         ctx.db.rollback()
-        ctx.db.close()
         raise e
-    ctx.db.close()
+    finally:
+        ctx.db.close()
     return ret
 
 
@@ -49,3 +48,22 @@ def _encode_row_obj(obj):
 def _encode_row_proxy(obj):
     pass
 
+
+class helper:
+    """
+    from sqlalchemy_plugin import plugin
+    plugin.init()
+    app.add_processor(plugin.processor)
+    """
+    def config(self):
+        """
+        database:
+            protocol: 'mysql+mysqlconnector'
+            username: 'root'
+            password: 'the_password'
+            host: 'localhost'
+            port: 3306
+            database: 'database_name'
+
+        """
+        pass

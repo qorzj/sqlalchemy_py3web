@@ -3,7 +3,7 @@
 from setuptools import setup
 
 setup(name='sqlalchemy_py3web',
-       version='0.1.2',
+       version='0.1.3',
        description='sqlalchemy_py3web is a sqlalchemy plugin for py3web',
        author='qorzj',
        author_email='inull@qq.com',
