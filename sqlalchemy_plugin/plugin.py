@@ -21,7 +21,9 @@ def init():
         dbconf.port,
         dbconf.database,
     ), pool_recycle=3600)
+    engine.echo = dbconf.get('echo', False)
     web.g.db_session_maker = sessionmaker(bind=engine)
+    if dbconf.get('create_db', False): obase.metadata.create_all(engine)
     web.add_json_encoder(_encode_row_obj)
 
 
